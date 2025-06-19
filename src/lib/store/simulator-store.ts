@@ -10,6 +10,12 @@ interface UserInfo {
   income: number;
 }
 
+interface ContactInfo {
+  name: string;
+  email: string;
+  phone: string;
+}
+
 interface SimulatorState {
   step: number;
   projectType: ProjectType | null;
@@ -18,6 +24,8 @@ interface SimulatorState {
   user2: UserInfo;
   monthlyCharges: number;
   personalDeposit: number;
+  contact: ContactInfo;
+  rgpdConsent: boolean;
   setProjectType: (type: ProjectType) => void;
   setSituation: (situation: Situation) => void;
   // Nouvelle action pour mettre à jour les infos d'un utilisateur
@@ -27,6 +35,9 @@ interface SimulatorState {
   setPersonalDeposit: (amount: number) => void;
   nextStep: () => void;
   prevStep: () => void;
+  updateContactInfo: (data: Partial<ContactInfo>) => void;
+  setRgpdConsent: (consent: boolean) => void;
+  reset: () => void;
 }
 
 const TOTAL_STEPS = 6;
@@ -44,6 +55,8 @@ export const useSimulatorStore = create<SimulatorState>((set) => ({
   user2: { ...initialUserInfo },
   monthlyCharges: 0,
   personalDeposit: 0,
+  contact: { name: '', email: '', phone: '' },
+  rgpdConsent: false,
   setProjectType: (type) => set({ projectType: type }),
   setSituation: (situation) => set({ situation }),
   updateUserInfo: (user, data) =>
@@ -55,4 +68,17 @@ export const useSimulatorStore = create<SimulatorState>((set) => ({
   setPersonalDeposit: (amount) => set({ personalDeposit: amount }),
   nextStep: () => set((state) => ({ step: Math.min(state.step + 1, TOTAL_STEPS) })),
   prevStep: () => set((state) => ({ step: Math.max(state.step - 1, 1) })),
+  updateContactInfo: (data) => set((state) => ({ contact: { ...state.contact, ...data } })),
+  setRgpdConsent: (consent) => set({ rgpdConsent: consent }),
+  reset: () => set({
+    step: 1,
+    projectType: null,
+    situation: null,
+    user1: { ...initialUserInfo },
+    user2: { ...initialUserInfo },
+    monthlyCharges: 0,
+    personalDeposit: 0,
+    contact: { name: '', email: '', phone: '' },
+    rgpdConsent: false,
+  }),
 })); 
