@@ -8,9 +8,9 @@ import { useSimulatorStore } from '@/lib/store/simulator-store';
 import { Step1ProjectType } from './Step1ProjectType';
 // Importer le nouveau composant d'étape
 import { Step2Situation } from './Step2Situation';
+import { Step3Professional } from './Step3Professional';
 
 // Placeholders pour chaque étape. On les remplira plus tard.
-const Step3 = () => <div>Contenu de l&apos;étape 3: Situation Pro</div>;
 const Step4 = () => <div>Contenu de l&apos;étape 4: Revenus & Charges</div>;
 const Step5 = () => <div>Contenu de l&apos;étape 5: Apport</div>;
 const Step6 = () => <div>Contenu de l&apos;étape 6: Formulaire de contact</div>;
@@ -19,9 +19,15 @@ const TOTAL_STEPS = 6;
 
 export function ProjectSimulator() {
   // On récupère la situation et le setter depuis le store
-  const { step, nextStep, prevStep, projectType, situation } = useSimulatorStore();
+  const { step, nextStep, prevStep, projectType, situation, user1, user2 } = useSimulatorStore();
 
   const progressValue = (step / TOTAL_STEPS) * 100;
+
+  const isStep3Valid = () => {
+    if (!user1.status || user1.income <= 0) return false;
+    if (situation === 'duo' && (!user2.status || user2.income <= 0)) return false;
+    return true;
+  };
 
   return (
     <Card className="w-full max-w-[600px] shadow-lg">
@@ -33,7 +39,7 @@ export function ProjectSimulator() {
       <CardContent className="min-h-[250px] flex items-center justify-center w-full">
         {step === 1 && <Step1ProjectType />}
         {step === 2 && <Step2Situation />}
-        {step === 3 && <Step3 />}
+        {step === 3 && <Step3Professional />}
         {step === 4 && <Step4 />}
         {step === 5 && <Step5 />}
         {step === 6 && <Step6 />}
@@ -51,7 +57,8 @@ export function ProjectSimulator() {
           // La logique de désactivation devient plus intelligente
           disabled={
             (step === 1 && !projectType) ||
-            (step === 2 && !situation)
+            (step === 2 && !situation) ||
+            (step === 3 && !isStep3Valid())
           }
         >
           {step === TOTAL_STEPS ? 'Obtenir ma simulation' : 'Suivant'}
