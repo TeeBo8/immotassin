@@ -9,17 +9,17 @@ import { Step1ProjectType } from './Step1ProjectType';
 // Importer le nouveau composant d'étape
 import { Step2Situation } from './Step2Situation';
 import { Step3Professional } from './Step3Professional';
+import { Step4Charges } from './Step4Charges';
+import { Step5Deposit } from './Step5Deposit';
 
 // Placeholders pour chaque étape. On les remplira plus tard.
-const Step4 = () => <div>Contenu de l&apos;étape 4: Revenus & Charges</div>;
-const Step5 = () => <div>Contenu de l&apos;étape 5: Apport</div>;
 const Step6 = () => <div>Contenu de l&apos;étape 6: Formulaire de contact</div>;
 
 const TOTAL_STEPS = 6;
 
 export function ProjectSimulator() {
   // On récupère la situation et le setter depuis le store
-  const { step, nextStep, prevStep, projectType, situation, user1, user2 } = useSimulatorStore();
+  const { step, nextStep, prevStep, projectType, situation, user1, user2, personalDeposit } = useSimulatorStore();
 
   const progressValue = (step / TOTAL_STEPS) * 100;
 
@@ -28,6 +28,10 @@ export function ProjectSimulator() {
     if (situation === 'duo' && (!user2.status || user2.income <= 0)) return false;
     return true;
   };
+
+  // L'étape 4 (charges) est valide même à 0
+  // L'étape 5 (apport) nécessite un montant pour être valide
+  const isStep5Valid = () => personalDeposit >= 0; // On accepte 0 comme apport valide
 
   return (
     <Card className="w-full max-w-[600px] shadow-lg">
@@ -40,8 +44,8 @@ export function ProjectSimulator() {
         {step === 1 && <Step1ProjectType />}
         {step === 2 && <Step2Situation />}
         {step === 3 && <Step3Professional />}
-        {step === 4 && <Step4 />}
-        {step === 5 && <Step5 />}
+        {step === 4 && <Step4Charges />}
+        {step === 5 && <Step5Deposit />}
         {step === 6 && <Step6 />}
       </CardContent>
       <CardFooter className="flex justify-between">
@@ -58,7 +62,8 @@ export function ProjectSimulator() {
           disabled={
             (step === 1 && !projectType) ||
             (step === 2 && !situation) ||
-            (step === 3 && !isStep3Valid())
+            (step === 3 && !isStep3Valid()) ||
+            (step === 5 && !isStep5Valid()) // Ajout de la validation pour l'étape 5
           }
         >
           {step === TOTAL_STEPS ? 'Obtenir ma simulation' : 'Suivant'}
