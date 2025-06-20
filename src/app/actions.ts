@@ -40,7 +40,7 @@ export async function submitSimulation(data: ReturnType<typeof useSimulatorStore
 
     await resend.emails.send({
       from: 'Lead Notifier <onboarding@resend.dev>', // Doit être un domaine vérifié sur Resend
-      to: ['t.leture@gmail.com'], // Email temporaire pour test - à remplacer par celui de Christopher plus tard
+      to: ['christopher.tassin@bpfinancement.fr'], // Email de Christopher Tassin - BP Financement
       subject: '🔥 Nouveau Lead Immobilier - ' + data.contact.name,
       html: emailHtml,
     });
