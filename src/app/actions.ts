@@ -2,6 +2,7 @@
 
 import { useSimulatorStore } from '@/lib/store/simulator-store';
 import { Resend } from 'resend';
+import { z } from 'zod';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -49,5 +50,49 @@ export async function submitSimulation(data: ReturnType<typeof useSimulatorStore
   } catch (error) {
     console.error(error);
     return { success: false, error: 'Une erreur est survenue.' };
+  }
+}
+
+// Schéma de validation pour le formulaire de contact
+const contactSchema = z.object({
+  name: z.string().min(2, { message: 'Le nom doit contenir au moins 2 caractères.' }),
+  email: z.string().email({ message: 'Veuillez entrer une adresse email valide.' }),
+  message: z.string().min(10, { message: 'Le message doit contenir au moins 10 caractères.' }),
+});
+
+export async function sendContactMessage(formData: FormData) {
+  const data = Object.fromEntries(formData.entries());
+
+  // Validation avec Zod
+  const validatedFields = contactSchema.safeParse(data);
+
+  if (!validatedFields.success) {
+    return {
+      success: false,
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  const { name, email, message } = validatedFields.data;
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: 'Contact Form <onboarding@resend.dev>', // Doit être un domaine vérifié
+      to: 'christopher.tassin@bpfinancement.fr', // Email du client
+      replyTo: email, // Permet de répondre directement au client
+      subject: `Nouveau message de contact de ${name}`,
+      html: `
+        <p><strong>Nom :</strong> ${name}</p>
+        <p><strong>Email :</strong> ${email}</p>
+        <hr>
+        <p><strong>Message :</strong></p>
+        <p>${message.replace(/\n/g, '<br>')}</p>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "L'envoi du message a échoué." };
   }
 } 
